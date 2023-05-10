@@ -9,3 +9,6 @@ services:
       - BOT_TOKEN=$BOT_TOKEN
     command: |
       python bot.py
+      
+  redis:
+    image: redis:latest
