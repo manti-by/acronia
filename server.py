@@ -1,5 +1,5 @@
 import logging
-from json import JSONDecodeError
+from json import JSONDecodeError, loads
 
 from aiohttp import WSMessage, WSMsgType, web
 from aiohttp_apispec import docs, request_schema, setup_aiohttp_apispec
@@ -64,7 +64,17 @@ async def websockets(request):
             if msg.data == "/close":
                 await ws.close()
             else:
-                await ws.send_str(msg.data)
+                try:
+                    schema = MessageSchema()
+                    data = schema.load(loads(msg.data))
+                    message = data.get("message")
+                    if data.get("chat_id"):
+                        await send_message(data.get("chat_id"), data.get("message"))
+                    else:
+                        await send_message_to_all(data.get("message"))
+                except ValidationError as e:
+                    message = str(e)
+                await ws.send_str(message)
         elif msg.type == WSMsgType.ERROR:
             logger.error(f"WS connection closed with exception {request.app.ws.exception()}")
     return ws
