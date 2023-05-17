@@ -74,6 +74,8 @@ async def websockets(request):
                         await send_message_to_all(data.get("message"))
                 except ValidationError as e:
                     message = str(e)
+                except Exception as e:
+                    message = str(e)
                 await ws.send_str(message)
         elif msg.type == WSMsgType.ERROR:
             logger.error(f"WS connection closed with exception {request.app.ws.exception()}")
